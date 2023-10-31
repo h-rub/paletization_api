@@ -55,6 +55,36 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+CORS_ALLOWED_ORIGINS = [
+    "http://em10vs0010.embraco.com:9001",
+    "https://em10vs0010.embraco.com:9001",
+    "http://localhost:5172",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
@@ -127,10 +157,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOWED_ORIGINS = [
-    "http://em10vs0010.embraco.com:9001",
-    "https://em10vs0010.embraco.com:9001",
-    "http://localhost:5172",
-    "http://127.0.0.1:5173",
-]
