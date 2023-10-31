@@ -7,5 +7,5 @@ urlpatterns = [
     path('pallets/<str:pallet_id>/components/', ComponentListByPalletView.as_view(), name='component-list-by-pallet'),
     path('pallets/<str:pallet_id>/components/add/', ComponentAssociateToPalletView.as_view(), name='component-associate-to-pallet'),
     path('pallets/<str:pallet_id>/components/<int:component_id>/dismount/', ComponentDismountFromPalletView.as_view(), name='component-dismount-from-pallet'),
-    path('pallets/<str:pallet_id>/sap/notifiy', NotifiyToSAPView.as_view(), name='notify-to-sap')
+    path('pallets/sap/notifiy', NotifiyToSAPView.as_view(), name='notify-to-sap')
 ]
