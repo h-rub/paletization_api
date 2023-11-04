@@ -22,7 +22,7 @@ class Pallet(models.Model):
     def __str__(self):
         return f"{self.identifier} - {self.quantity}"
 
-class Component(models.Model):
+class MountedComponent(models.Model):
     pallet = models.ForeignKey(Pallet, on_delete=models.CASCADE)
     condenser_unit_serial = models.CharField(max_length=250)
     condenser_material_code = models.CharField(max_length=250)

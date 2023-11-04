@@ -1,21 +1,21 @@
 from rest_framework import serializers
-from .models import Pallet, Component
+from .models import Pallet, MountedComponent
 
 class PalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pallet
         fields = '__all__'  # Puedes especificar los campos que deseas incluir aquí si no quieres todos.
 
-class ComponentSerializer(serializers.ModelSerializer):
+class MountedComponentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Component
+        model = MountedComponent
         fields = '__all__' 
 
-class ComponentCreateSerializer(serializers.ModelSerializer):    
+class MountedComponentCreateSerializer(serializers.ModelSerializer):    
     pallet_id = serializers.CharField(write_only=True)
 
     class Meta:
-        model = Component
+        model = MountedComponent
         exclude = ['pallet']
 
     def create(self, validated_data):
@@ -27,5 +27,5 @@ class ComponentCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Pallet not found")
 
         # Asociamos el componente al pallet y lo guardamos.
-        component = Component.objects.create(pallet=pallet, **validated_data)
+        component = MountedComponent.objects.create(pallet=pallet, **validated_data)
         return component

@@ -4,8 +4,8 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Pallet, Component
-from .serializers import PalletSerializer, ComponentSerializer, ComponentCreateSerializer
+from .models import Pallet, MountedComponent
+from .serializers import PalletSerializer, MountedComponentSerializer, MountedComponentCreateSerializer
 from .sap_client import get_sap_client
 from xml.etree import ElementTree as ET
 
@@ -41,23 +41,23 @@ class PalletListCreateView(APIView):
         except Pallet.DoesNotExist:
             return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ComponentListByPalletView(APIView):
+class MountedComponentListByPalletView(APIView):
     def get(self, request, pallet_id):
         try:
             pallet = Pallet.objects.get(identifier=pallet_id)
-            components = Component.objects.filter(pallet=pallet)
-            serializer = ComponentSerializer(components, many=True)
+            components = MountedComponent.objects.filter(pallet=pallet)
+            serializer = MountedComponentSerializer(components, many=True)
             return Response(serializer.data)
         except Pallet.DoesNotExist:
             return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ComponentAssociateToPalletView(APIView):
+class MountedComponentAssociateToPalletView(APIView):
     def post(self, request, pallet_id):
         try:
             pallet = Pallet.objects.get(identifier=pallet_id)
             data = request.data
             data['pallet_id'] = pallet.identifier  # Asigna el identificador del pallet a 'pallet_id'
-            serializer = ComponentCreateSerializer(data=data)
+            serializer = MountedComponentCreateSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -65,16 +65,16 @@ class ComponentAssociateToPalletView(APIView):
         except Pallet.DoesNotExist:
             return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class ComponentDismountFromPalletView(APIView):
+class MountedComponentDismountFromPalletView(APIView):
     def delete(self, request, pallet_id, component_id):
         try:
             pallet = Pallet.objects.get(identifier=pallet_id)
             try:
-                component = Component.objects.get(id=component_id, pallet=pallet)
+                component = MountedComponent.objects.get(id=component_id, pallet=pallet)
                 component.delete()
-                return Response({"msg": "Component dismounted"}, status=status.HTTP_204_NO_CONTENT)
-            except Component.DoesNotExist:
-                return Response({"error": "Component not found in the pallet."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"msg": "MountedComponent dismounted"}, status=status.HTTP_204_NO_CONTENT)
+            except MountedComponent.DoesNotExist:
+                return Response({"error": "MountedComponent not found in the pallet."}, status=status.HTTP_404_NOT_FOUND)
         except Pallet.DoesNotExist:
             return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
 
