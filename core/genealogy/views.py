@@ -48,3 +48,17 @@ class ComponentAPIView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        compressor_unit_serial = request.query_params.get('condenser_unit_serial')
+
+        if compressor_unit_serial:
+            try:
+                component = Component.objects.get(compressor_unit_serial=compressor_unit_serial)
+                component.delete()
+                return Response({"success": True}, status=status.HTTP_204_NO_CONTENT)
+            except Component.DoesNotExist:
+                return Response({"detail": "Component not found.", "success": False}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"detail": "Please provide condenser."}, status=status.HTTP_400_BAD_REQUEST)
+
