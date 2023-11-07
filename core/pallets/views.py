@@ -81,9 +81,10 @@ class MountedComponentDismountFromPalletView(APIView):
 class NotifiyToSAPView(APIView):
 
     def convert_json_to_xml(self, json_data):
-        envelope = ET.Element("soapenv:Envelope", xmlns="http://schemas.xmlsoap.org/soap/envelope/")
+        envelope = ET.Element("soapenv:Envelope",  attrib={"xmlns:soapenv": "http://schemas.xmlsoap.org/soap/envelope/", "xmlns:urn": "urn:sap-com:document:sap:soap:functions:mc-style"})
         body = ET.Element("soapenv:Body")
-        zppfm_production_notification = ET.Element("urn:ZppfmProductionNotification", xmlns="urn:sap-com:document:sap:soap:functions:mc-style")
+        header = ET.Element("soapenv:Header")
+        zppfm_production_notification = ET.Element("urn:ZppfmProductionNotification")
         
         # Construct XML elements based on JSON data
         elements = {
@@ -111,18 +112,27 @@ class NotifiyToSAPView(APIView):
         zppfm_production_notification.append(it_json_inst)
         
         body.append(zppfm_production_notification)
-        envelope.append(body)
+
+        envelope.append(header)
         
-        xml_string = ET.tostring(envelope).decode()
+        envelope.append(body)
+    
+        xml_string = ET.tostring(envelope, encoding='utf-8').decode()
         return xml_string
     
-    def get(self, request):
+    def post(self, request):
         sap_client = get_sap_client()
         json_data = request.data
         # Convert the JSON data to an XML request
         xml_data = self.convert_json_to_xml(json_data)
-        print(xml_data)
+        print(type(xml_data))
         # Build the SOAP request using the data from the JSON
-        sap_response = sap_client.service[0].ZppfmProductionNotification(xml_data)
+        sap_response = sap_client.service.ZppfmProductionNotification(
+            json_data.get("IArbpl", ""), json_data.get("IAufnr", ""), 
+            json_data.get("ICharg", ""),
+            json_data.get("IComplemento", ""), json_data.get("IDataProd", ""), json_data.get("IFase", ""), 
+            json_data.get("IHoraProd", ""), json_data.get("IMatnrDestino", ""), json_data.get("IMatnrOrig"),  
+            json_data.get("INumin", ""), str(json_data.get("IQuantProd", 0)),
+            str(json_data.get("ItJsonInst", "")))
         print(sap_response)
-        return Response({})
+        return Response(sap_response)
