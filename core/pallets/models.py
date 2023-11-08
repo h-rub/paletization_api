@@ -8,6 +8,10 @@ class Pallet(models.Model):
     datetime_created = models.DateTimeField(auto_now_add=True)
     datetime_closed = models.DateTimeField(null=True, blank=True)
     is_closed = models.BooleanField(default=False)
+    send_to_sap = models.BooleanField(default=False)
+    sap_success = models.BooleanField(default=False)
+    sap_status = models.CharField(max_length=500, null=True, blank=True)
+    fase = models.CharField(max_length=250, blank=True, null=True)
 
     def close_pallet(self):
         self.is_closed = True
@@ -31,7 +35,6 @@ class MountedComponent(models.Model):
     material_type = models.CharField(max_length=10, null=True, blank=True)
     send_to_sap = models.BooleanField(default=False)
     sap_status = models.CharField(max_length=250, null=True, blank=True)
-    serie = models.CharField(max_length=250, blank=True, null=True)
 
     def __str__(self):
         return f"{self.code}"

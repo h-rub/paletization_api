@@ -126,13 +126,57 @@ class NotifiyToSAPView(APIView):
         # Convert the JSON data to an XML request
         xml_data = self.convert_json_to_xml(json_data)
         print(type(xml_data))
+        palletId = json_data.get("ICharg", "")
+        try:
+            pallet = Pallet.objects.get(identifier = palletId)
+        except Pallet.DoesNotExist:
+            return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
         # Build the SOAP request using the data from the JSON
-        sap_response = sap_client.service.ZppfmProductionNotification(
+        components_list = json_data.get("ItJsonInst", "")
+        if pallet.send_to_sap:
+            complemento = "X"
+        else:
+            complemento = ""
+        try:
+            sap_response = sap_client.service.ZppfmProductionNotification(
             json_data.get("IArbpl", ""), json_data.get("IAufnr", ""), 
             json_data.get("ICharg", ""),
-            json_data.get("IComplemento", ""), json_data.get("IDataProd", ""), json_data.get("IFase", ""), 
+            complemento, json_data.get("IDataProd", ""), json_data.get("IFase", ""), 
             json_data.get("IHoraProd", ""), json_data.get("IMatnrDestino", ""), json_data.get("IMatnrOrig"),  
             json_data.get("INumin", ""), str(json_data.get("IQuantProd", 0)),
-            str(json_data.get("ItJsonInst", "")))
-        print(sap_response)
-        return Response(sap_response)
+            str(components_list))
+            fase = sap_response.EFase
+            message = sap_response.EMessage
+            pallet.send_to_sap = True
+            if message == "":
+                pallet.sap_success = True
+                pallet.sap_status = f"Lote {palletId} sincronizado con éxito en SAP."
+                for component_data in components_list:
+                    condenser_serial = component_data["sernr"]
+                    compressor_serial = component_data["serfi"]
+                    # Si hay MountedComponent asociados al Pallet, también los actualizamos
+                    mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
+                    mounted_component.send_to_sap = True
+                    mounted_component.sap_status = "Procesado exitosamente"
+                    mounted_component.save()
+            else:
+                pallet.sap_success = False
+                pallet.sap_status = f"Error en sincronización de lote {palletId}. Detalles: {message}"
+                for component_data in components_list:
+                    condenser_serial = component_data["sernr"]
+                    compressor_serial = component_data["serfi"]
+                    # Si hay MountedComponent asociados al Pallet, también los actualizamos
+                    mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
+                    mounted_component.send_to_sap = False
+                    mounted_component.sap_status = "Error al procesar"
+                    mounted_component.save()
+            
+            pallet.fase = fase
+            pallet.save()
+            print(fase)
+            print(message)
+            
+            return Response(sap_response)
+        except Exception as e:
+            print(e)
+            return Response({"error": f"Error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
