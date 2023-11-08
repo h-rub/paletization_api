@@ -135,7 +135,7 @@ class NotifiyToSAPView(APIView):
         # Build the SOAP request using the data from the JSON
         components_list = json_data.get("ItJsonInst", "")
         mat_destino = json_data.get("IMatnrDestino", "")
-        if pallet.send_to_sap:
+        if pallet.send_to_sap == True:
             complemento = "X"
         else:
             complemento = ""
