@@ -157,7 +157,7 @@ class NotifiyToSAPView(APIView):
                     # Si hay MountedComponent asociados al Pallet, también los actualizamos
                     mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
                     mounted_component.send_to_sap = True
-                    mounted_component.sap_status = "Procesado exitosamente"
+                    mounted_component.sap_status = "Procesado"
                     mounted_component.save()
             else:
                 pallet.sap_success = False
