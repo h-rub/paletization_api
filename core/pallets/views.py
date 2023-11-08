@@ -57,6 +57,7 @@ class MountedComponentAssociateToPalletView(APIView):
             pallet = Pallet.objects.get(identifier=pallet_id)
             data = request.data
             data['pallet_id'] = pallet.identifier  # Asigna el identificador del pallet a 'pallet_id'
+            # TODO: Validar que el componente no esté asociado a otro pallet
             serializer = MountedComponentCreateSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -133,6 +134,7 @@ class NotifiyToSAPView(APIView):
             return Response({"error": "Pallet not found."}, status=status.HTTP_404_NOT_FOUND)
         # Build the SOAP request using the data from the JSON
         components_list = json_data.get("ItJsonInst", "")
+        mat_destino = json_data.get("IMatnrDestino", "")
         if pallet.send_to_sap:
             complemento = "X"
         else:
@@ -142,7 +144,7 @@ class NotifiyToSAPView(APIView):
             json_data.get("IArbpl", ""), json_data.get("IAufnr", ""), 
             json_data.get("ICharg", ""),
             complemento, json_data.get("IDataProd", ""), json_data.get("IFase", ""), 
-            json_data.get("IHoraProd", ""), json_data.get("IMatnrDestino", ""), json_data.get("IMatnrOrig"),  
+            json_data.get("IHoraProd", ""), mat_destino, json_data.get("IMatnrOrig"),  
             json_data.get("INumin", ""), str(json_data.get("IQuantProd", 0)),
             str(components_list))
             fase = sap_response.EFase
@@ -152,8 +154,8 @@ class NotifiyToSAPView(APIView):
                 pallet.sap_success = True
                 pallet.sap_status = f"Lote {palletId} sincronizado con éxito en SAP."
                 for component_data in components_list:
-                    condenser_serial = component_data["sernr"]
-                    compressor_serial = component_data["serfi"]
+                    condenser_serial = mat_destino + component_data["sernr"]
+                    compressor_serial = component_data["matfi"][:9] + component_data["serfi"]
                     # Si hay MountedComponent asociados al Pallet, también los actualizamos
                     mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
                     mounted_component.send_to_sap = True
