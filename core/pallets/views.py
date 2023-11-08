@@ -156,6 +156,8 @@ class NotifiyToSAPView(APIView):
                 for component_data in components_list:
                     condenser_serial = mat_destino + component_data["sernr"]
                     compressor_serial = component_data["matfi"][:9] + component_data["serfi"]
+                    print(condenser_serial)
+                    print(compressor_serial)
                     # Si hay MountedComponent asociados al Pallet, también los actualizamos
                     mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
                     mounted_component.send_to_sap = True
@@ -165,8 +167,8 @@ class NotifiyToSAPView(APIView):
                 pallet.sap_success = False
                 pallet.sap_status = f"Error en sincronización de lote {palletId}. Detalles: {message}"
                 for component_data in components_list:
-                    condenser_serial = component_data["sernr"]
-                    compressor_serial = component_data["serfi"]
+                    condenser_serial =  mat_destino + component_data["sernr"]
+                    compressor_serial = component_data["matfi"][:9] + component_data["serfi"]
                     # Si hay MountedComponent asociados al Pallet, también los actualizamos
                     mounted_component = MountedComponent.objects.get(pallet=pallet, condenser_unit_serial = condenser_serial, compressor_unit_serial = compressor_serial)
                     mounted_component.send_to_sap = False
