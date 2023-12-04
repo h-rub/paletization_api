@@ -135,7 +135,7 @@ class NotifiyToSAPView(APIView):
         # Build the SOAP request using the data from the JSON
         components_list = json_data.get("ItJsonInst", "")
         mat_destino = json_data.get("IMatnrDestino", "")
-        if pallet.send_to_sap == True:
+        if pallet.send_to_sap and pallet.sap_success:
             complemento = "X"
         else:
             complemento = ""
@@ -149,8 +149,8 @@ class NotifiyToSAPView(APIView):
             str(components_list))
             fase = sap_response.EFase
             message = sap_response.EMessage
-            pallet.send_to_sap = True
-            if message == "":
+            if message == "Process Notification executed successfully":
+                pallet.send_to_sap = True
                 pallet.sap_success = True
                 pallet.sap_status = f"Lote {palletId} sincronizado con éxito en SAP."
                 for component_data in components_list:
