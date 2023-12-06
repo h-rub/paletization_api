@@ -140,7 +140,7 @@ class NotifiyToSAPView(APIView):
         else:
             complemento = ""
         try:
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             sap_response = sap_client.service.ZppfmProductionNotification(
             json_data.get("IArbpl", ""), json_data.get("IAufnr", ""), 
             json_data.get("ICharg", ""),
