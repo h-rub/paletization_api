@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render
 
 # Create your views here.
@@ -140,14 +141,14 @@ class NotifiyToSAPView(APIView):
         else:
             complemento = ""
         try:
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             sap_response = sap_client.service.ZppfmProductionNotification(
             json_data.get("IArbpl", ""), json_data.get("IAufnr", ""), 
             json_data.get("ICharg", ""),
             complemento, json_data.get("IDataProd", ""), json_data.get("IFase", ""), 
             json_data.get("IHoraProd", ""), mat_destino, json_data.get("IMatnrOrig"),  
             json_data.get("INumin", ""), str(json_data.get("IQuantProd", 0)),
-            components_list)
+            json.dumps(components_list))
             fase = sap_response.EFase
             message = sap_response.EMessage
             if message == "Process Notification executed successfully":
