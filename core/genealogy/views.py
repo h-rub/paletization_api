@@ -9,6 +9,27 @@ class ComponentAPIView(APIView):
     def get(self, request):
         condenser_unit_serial = request.query_params.get('condenser_unit_serial')
         compressor_unit_serial = request.query_params.get('compressor_unit_serial')
+        order = request.query_params.get('order')
+        mode = request.query_params.get('mode')
+
+        if order:
+            if mode == 'list':
+                try:
+                    components = Component.objects.filter(order=order)
+                    serializer = ComponentSerializer(components, many=True)
+                    return Response(serializer.data)
+                except Component.DoesNotExist:
+                    return Response([])
+            elif mode == 'count':
+                try:
+                    components = Component.objects.filter(order=order)
+                    response = {
+                        "total": len(components),
+                        "order": order
+                    }
+                    return Response(response)
+                except Component.DoesNotExist:
+                    return Response([])
 
         if condenser_unit_serial:
             try:
